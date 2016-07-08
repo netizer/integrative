@@ -16,9 +16,7 @@ You may ask
 
 > :triumph:: ok, but why would I use Integrative? I can easily implement that on my own.
 
-&nbsp;
-
-> :sunglasses:: I'm glad you asked. The best reason is that **it helps fetch a lot of data at once**, and by that it significantly improves performance.
+> :sunglasses:: I'm glad you asked. The best reason is that **it helps to fetch a lot of data at once**, and by that it significantly improves performance.
 
 ## Examples
 ### Example 1: Another data store
