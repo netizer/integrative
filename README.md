@@ -27,7 +27,7 @@ Imagine the following context:
 
 ```ruby
   class User < ApplicationRecord
-    integrate :user_flags
+    integrates :user_flags
   end
 
   class UserFlag < SomeRedisObject
@@ -64,7 +64,7 @@ Let's say you have the following situation:
 
 ```ruby
   class User < ApplicationRecord
-    integrate :relation_with_current_user, as: :boolean
+    integrates :relation_with_current_user, as: :boolean
   end
 
   class RelationWithCurrentUser < SomeRedisObject
