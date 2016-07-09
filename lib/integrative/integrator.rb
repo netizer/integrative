@@ -6,32 +6,33 @@ module Integrative
     end
 
     class_methods do
-      def integrates(name)
+      def integrates(name, options = {})
         if !defined?(integrations_defined)
-          override_activerecord_relation_methods_for_attachments
+          patch_activerecord_relation_for_integrative
           class_attribute :integrations_defined
         end
         self.integrations_defined ||= []
-        self.integrations_defined << name
+        self.integrations_defined << Integration.new(name, self, options)
         self.class_eval do
           attr_accessor name
         end
       end
 
-      def integrate(*name)
-        all.integrate(*name)
+      def integrate(*attrs)
+        all.integrate(*attrs)
       end
 
-      def override_activerecord_relation_methods_for_attachments
+      def patch_activerecord_relation_for_integrative
         self::ActiveRecord_Relation.class_eval do
           def integrate(*name_or_names)
             names = [*name_or_names]
             names.each do |name|
-              if !klass.integrations_defined.include?(name)
-                throw "Unknown attachment '#{name}'"
+              integration = klass.integrations_defined.find { |integration| integration.name == name }
+              if integration.nil?
+                throw "Unknown integration '#{name}'"
               end
               @integrations_used ||= []
-              @integrations_used << name
+              @integrations_used << integration
             end
             self
           end
@@ -41,23 +42,7 @@ module Integrative
             if @integrations_used.present?
               Rails.logger.info "Integrations fetched for #{@records.length} #{klass.name} records."
               @integrations_used.each do |integration|
-                integrated_class = integration.to_s.camelize.constantize
-
-                # TODO:
-                #integrator_class = self
-
-                #results = integrated_class.integrative_find(@records, integration)
-                to_integrates = integrated_class.find(@records.map(&:id))
-                to_integrates_by_id = {}
-                to_integrates.each do |to_integrate|
-                  to_integrates_by_id[to_integrate.id] = to_integrate
-                end
-                to_integrates_by_id
-
-                #integrator_class.integrative_assign(@records, results, integration)
-                @records.each do |record|
-                  record.public_send("#{integration}=", to_integrates_by_id[record.id])
-                end
+                integration.integrated_class.find_and_assign(@records, integration)
               end
             end
             self

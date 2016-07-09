@@ -23,6 +23,8 @@
 
 module Integrative
   autoload :Integrator, 'integrative/integrator'
+  autoload :Integrated, 'integrative/integrated'
+  autoload :Integration, 'integrative/integration'
 end
 
 
