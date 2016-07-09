@@ -5,6 +5,11 @@ FactoryGirl.define do
 
   factory :category do
     name "Johns"
-    user
+    association :user
+  end
+
+  factory :friend do
+    association :user
+    association :other_user, factory: :user
   end
 end

@@ -24,13 +24,15 @@ module Integrative
 
       def patch_activerecord_relation_for_integrative
         self::ActiveRecord_Relation.class_eval do
-          def integrate(*name_or_names)
+          def integrate(*name_or_names, **options)
             names = [*name_or_names]
             names.each do |name|
               integration = klass.integrations_defined.find { |integration| integration.name == name }
               if integration.nil?
                 throw "Unknown integration '#{name}'"
               end
+              integration.call_options = options
+              integration.invalidate
               @integrations_used ||= []
               @integrations_used << integration
             end
