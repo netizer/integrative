@@ -17,19 +17,11 @@ class Relation
   def self.find(ids, options)
     user = options[:user]
 
-    first_degree_friends = Friend.where(user: options[:user], other_user_id: ids).all
-    first_degree_friend_ids = first_degree_friends.map(&:other_user_id)
+    first_degree_ids = Friend.select_related_user_ids(options[:user], ids)
+    second_degree_ids = Friend.select_related_user_ids(first_degree_ids, ids)
+    other_ids = ids - first_degree_ids - second_degree_ids
 
-    second_degree_friends = Friend.where(user_id: first_degree_friend_ids, other_user_id: ids).all
-    second_degree_friend_ids = second_degree_friends.map(&:other_user_id)
-
-    other_friend_ids = ids - first_degree_friend_ids - second_degree_friend_ids
-
-    firsts = first_degree_friends.map { |friend| {degree: 1, user_id: friend.other_user_id} }
-    seconds = second_degree_friends.map { |friend| {degree: 2, user_id: friend.other_user_id} }
-    others = other_friend_ids.map { |id| {degree: nil, user_id: id} }
-
-    firsts + seconds + others
+    format_result(1 => first_degree_ids, 2 => second_degree_ids, nil => other_ids)
   end
 
   def self.find_and_assign(integrator_records, integration)
@@ -43,5 +35,19 @@ class Relation
     integrator_records.each do |record|
       record.public_send(integration.setter, response_objects_by_integrator_id[record.id])
     end
+  end
+
+  private
+
+  def self.format_result(degree_hash)
+    result = []
+    degree_hash.map do |degree, ids|
+      result += with_degree(ids, degree)
+    end
+    result
+  end
+
+  def self.with_degree(user_ids, degree)
+    user_ids.map { |user_id| {degree: degree, user_id: user_id} }
   end
 end
