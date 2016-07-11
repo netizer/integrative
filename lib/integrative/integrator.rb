@@ -44,7 +44,7 @@ module Integrative
             if @integrations_used.present?
               Rails.logger.info "Integrations fetched for #{@records.length} #{klass.name} records."
               @integrations_used.each do |integration|
-                integration.integrated_class.find_and_assign(@records, integration)
+                integration.integrated_class.integrative_find_and_assign(@records, integration)
               end
             end
             self

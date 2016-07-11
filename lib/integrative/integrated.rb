@@ -6,6 +6,24 @@ module Integrative
     end
 
     class_methods do
+      def integrative_find(ids, options)
+        find(ids)
+      end
+
+      def integrative_find_and_assign(integrator_records, integration)
+        ids = integrator_records.map(&:id)
+        response_objects = integrative_find(ids, integration.call_options)
+        response_objects_by_integrator_id = array_to_hash(response_objects, :user_id)
+        integrator_records.each do |record|
+          record.public_send(integration.setter, response_objects_by_integrator_id[record.id])
+        end
+      end
+
+      private
+
+      def array_to_hash(array, key_method)
+        Hash[array.map { |object, id| [object.public_send(key_method), object] }]
+      end
     end
   end
 end

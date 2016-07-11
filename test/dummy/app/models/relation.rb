@@ -1,4 +1,6 @@
 class Relation
+  include Integrative::Integrated
+
   attr_accessor :kind
   attr_accessor :user_id
 
@@ -24,17 +26,9 @@ class Relation
     format_result(1 => first_degree_ids, 2 => second_degree_ids, nil => other_ids)
   end
 
-  def self.find_and_assign(integrator_records, integration)
-    ids = integrator_records.map(&:id)
-
-    response = find(ids, integration.call_options)
-    response_objects = response.map { |item| self.new(item) }
-
-    response_objects_by_integrator_id = Hash[response_objects.map.with_index { |object, id| [object.user_id, object]}]
-
-    integrator_records.each do |record|
-      record.public_send(integration.setter, response_objects_by_integrator_id[record.id])
-    end
+  def self.integrative_find(ids, options)
+    response = find(ids, options)
+    response.map { |item| self.new(item) }
   end
 
   private
