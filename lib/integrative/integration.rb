@@ -9,7 +9,7 @@ module Integrative
     def initialize(name, integrator_class, options)
       @name = name
       @integrator_class = integrator_class
-      @integrated_class = name.to_s.camelize.constantize
+      @integrated_class = name.to_s.camelize.singularize.constantize
       @init_options = options
     end
 

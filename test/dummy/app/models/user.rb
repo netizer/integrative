@@ -3,4 +3,5 @@ class User < ApplicationRecord
 
   integrates :facebook
   integrates :relation, requires: [:with]
+  integrates :flags, array: true
 end

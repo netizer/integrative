@@ -1,7 +1,6 @@
 class Facebook
   include Integrative::Integrated
 
-  attr_accessor :id
   attr_accessor :user_id
   attr_accessor :name
 
@@ -16,7 +15,6 @@ class Facebook
     ids.map do |id|
       user = User.find(id)
       {
-        id: id,
         user_id: user.id,
         name: "FB name of #{user.name}"
       }

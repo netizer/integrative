@@ -46,6 +46,13 @@ class Integrative::Test < ActiveSupport::TestCase
     assert_equal category_and_user_names, [["Frankist", "Fran"], ["Marxist", "Mar"]]
   end
 
+  test "integrates models as array" do
+    users = User.integrate(:flags).to_a
+
+    users_with_flags = users.map { |user| [user.name, user.flags.map(&:name)] }
+    assert_equal users_with_flags, [["Frank", [:admin, :editor]], ["Mark", [:editor]]]
+  end
+
   def create_friendship(user, other_user)
     FactoryGirl.create(:friend, user: user, other_user: other_user)
     FactoryGirl.create(:friend, user: other_user, other_user: user)
