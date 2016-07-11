@@ -23,7 +23,7 @@ class Facebook
     end
   end
 
-  def self.integrative_find(ids, options)
+  def self.integrative_find(ids, integration)
     response = find(ids)
     response.map { |item| self.new(item) }
   end

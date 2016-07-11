@@ -26,8 +26,8 @@ class Relation
     format_result(1 => first_degree_ids, 2 => second_degree_ids, nil => other_ids)
   end
 
-  def self.integrative_find(ids, options)
-    response = find(ids, options)
+  def self.integrative_find(ids, integration)
+    response = find(ids, integration.call_options)
     response.map { |item| self.new(item) }
   end
 
