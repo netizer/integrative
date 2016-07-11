@@ -11,11 +11,12 @@ module Integrative
       end
 
       def integrative_find_and_assign(integrator_records, integration)
-        ids = integrator_records.map(&:id)
-        response_objects = integrative_find(ids, integration.call_options)
-        response_objects_by_integrator_id = array_to_hash(response_objects, :user_id)
+        ids = integrator_records.map(&integration.integrator_key)
+        integrated = integrative_find(ids, integration.call_options)
+        integrated_by_integrator_id =
+          array_to_hash(integrated, integration.integrated_key)
         integrator_records.each do |record|
-          record.public_send(integration.setter, response_objects_by_integrator_id[record.id])
+          record.public_send(integration.setter, integrated_by_integrator_id[record.id])
         end
       end
 

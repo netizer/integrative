@@ -18,8 +18,15 @@ module Integrative
         end
       end
 
-      def integrate(*attrs)
-        all.integrate(*attrs)
+      def integrate(*name_or_names, **options)
+        if all.public_methods.include? :integrate
+          all.integrate(*name_or_names, **options)
+        else
+          raise "You tried to call `integrate` on a class #{name}" +
+            " but this class has no integrations." +
+            " add the following line to the class #{name}:" +
+            " 'integrates :#{name_or_names.join(', :')}'"
+        end
       end
 
       def patch_activerecord_relation_for_integrative

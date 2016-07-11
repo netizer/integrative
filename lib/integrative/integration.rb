@@ -5,12 +5,22 @@ module Integrative
     attr_accessor :integrated_class
     attr_accessor :init_options
     attr_accessor :call_options
+    attr_accessor :integrator_key
+    attr_accessor :integrated_key
 
     def initialize(name, integrator_class, options)
       @name = name
       @integrator_class = integrator_class
       @integrated_class = name.to_s.camelize.constantize
       @init_options = options
+      designated_key = integrator_class.column_names.find { |col| col == "#{name}_id" }
+      if designated_key
+        @integrator_key = designated_key.to_sym
+        @integrated_key = :id
+      else
+        @integrator_key = :id
+        @integrated_key = "#{integrator_class.name.underscore}_id"
+      end
     end
 
     def invalidate

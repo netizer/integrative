@@ -44,6 +44,14 @@ class Integrative::Test < ActiveSupport::TestCase
       ["Ana", :first_degree_friend], ["Maria", :second_degree_friend]]
   end
 
+  test "integrates models with guessed association key" do
+    skip "In the middle of work here"
+    #categories = Category.integrate(:recently_added_user).to_a
+
+    #category_and_user_names = categories.map { |category| [category.name, category.user.name] }
+    #assert_equal category_names, [["Frankist", "Frank"], ["Marxist", "Mark"]]
+  end
+
   def create_friendship(user, other_user)
     FactoryGirl.create(:friend, user: user, other_user: other_user)
     FactoryGirl.create(:friend, user: other_user, other_user: user)
