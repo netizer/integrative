@@ -13,6 +13,10 @@ module Integrative
         end
         self.integrations_defined ||= []
         self.integrations_defined << Integration.new(name, self, options)
+        if self.instance_methods.include? name
+          raise "Method '#{name}' is already defined on #{self.name}." +
+            " You can not define integration with this name."
+        end
         self.class_eval do
           attr_accessor name
         end

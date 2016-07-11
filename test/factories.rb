@@ -1,11 +1,11 @@
 FactoryGirl.define do
   factory :user do
     name "John"
+    association :category
   end
 
   factory :category do
     name "Johns"
-    association :user
   end
 
   factory :friend do

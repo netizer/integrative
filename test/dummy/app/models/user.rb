@@ -1,5 +1,6 @@
 class User < ApplicationRecord
-  integrates :category
+  belongs_to :category
+
   integrates :facebook
   integrates :relation, requires: [:user]
 end
