@@ -28,7 +28,7 @@ class Integrative::Test < ActiveSupport::TestCase
     create_friendship(@frank, ana)
     create_friendship(ana, maria)
 
-    users_with_relations = User.where.not(id: @frank.id).integrate(:relation, user: @frank)
+    users_with_relations = User.where.not(id: @frank.id).integrate(:relation, with: @frank)
 
     relations_per_user = users_with_relations.map do |user|
       [user.name, user.relation.kind]

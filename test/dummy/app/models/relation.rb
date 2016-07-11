@@ -19,7 +19,7 @@ class Relation
   def self.find(ids, options)
     user = options[:user]
 
-    first_degree_ids = Friend.select_related_user_ids(options[:user], ids)
+    first_degree_ids = Friend.select_related_user_ids(options[:with], ids)
     second_degree_ids = Friend.select_related_user_ids(first_degree_ids, ids)
     other_ids = ids - first_degree_ids - second_degree_ids
 
