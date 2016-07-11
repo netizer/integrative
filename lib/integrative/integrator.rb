@@ -5,20 +5,37 @@ module Integrative
     included do
     end
 
+
+    def integrative_dynamic_method_call(name, integration)
+      ivar = "@#{name}"
+      if instance_variable_defined? ivar
+        instance_variable_get ivar
+      else
+        Rails.logger.info "Integrations fetched for a single #{self.class.name} record."
+        integration.integrated_class.integrative_find_and_assign([self], integration)
+        instance_variable_get ivar
+      end
+    end
+
     class_methods do
       def integrates(name, options = {})
         if !defined?(integrations_defined)
           patch_activerecord_relation_for_integrative
           class_attribute :integrations_defined
         end
+        integration = Integration.new(name, self, options)
         self.integrations_defined ||= []
-        self.integrations_defined << Integration.new(name, self, options)
+        self.integrations_defined << integration
         if self.instance_methods.include? name
           raise "Method '#{name}' is already defined on #{self.name}." +
             " You can not define integration with this name."
         end
         self.class_eval do
           attr_accessor name
+
+          define_method name do
+            integrative_dynamic_method_call(name, integration)
+          end
         end
       end
 

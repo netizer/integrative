@@ -63,6 +63,10 @@ class Integrative::Test < ActiveSupport::TestCase
     ]
   end
 
+  test "integrate single model when its method is called" do
+    assert_equal @frank.gravatar, "http://0.gravatar.com/avatar/frank"
+  end
+
   def create_friendship(user, other_user)
     FactoryGirl.create(:friend, user: user, other_user: other_user)
     FactoryGirl.create(:friend, user: other_user, other_user: user)
