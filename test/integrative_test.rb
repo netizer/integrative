@@ -46,11 +46,21 @@ class Integrative::Test < ActiveSupport::TestCase
     assert_equal category_and_user_names, [["Frankist", "Fran"], ["Marxist", "Mar"]]
   end
 
-  test "integrates models as array" do
+  test "integrates models as arrays" do
     users = User.integrate(:flags).to_a
 
     users_with_flags = users.map { |user| [user.name, user.flags.map(&:name)] }
     assert_equal users_with_flags, [["Frank", [:admin, :editor]], ["Mark", [:editor]]]
+  end
+
+  test "integrates models as primary data types" do
+    users = User.integrate(:gravatar).to_a
+
+    users_with_flags = users.map { |user| [user.name, user.gravatar] }
+    assert_equal users_with_flags, [
+      ["Frank", "http://0.gravatar.com/avatar/frank"],
+      ["Mark", "http://0.gravatar.com/avatar/mark"]
+    ]
   end
 
   def create_friendship(user, other_user)

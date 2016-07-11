@@ -1,3 +1,5 @@
+require 'ostruct'
+
 module Integrative
   module Integrated
     extend ActiveSupport::Concern
@@ -23,26 +25,38 @@ module Integrative
         end
       end
 
+      def integrative_value(object, integration)
+        if [:primary, :value, :simple].include? integration.init_options[:as]
+          object[:value]
+        else
+          object
+        end
+      end
+
       private
 
       def array_to_hash(array, integration)
         if integration.init_options[:array]
-          array_to_hash_as_array(array, integration.integrated_key)
+          array_to_hash_as_array(array, integration)
         else
-          array_to_hash_as_value(array, integration.integrated_key)
+          array_to_hash_as_value(array, integration)
         end
       end
 
-      def array_to_hash_as_value(array, key_method)
-        Hash[array.map { |object| [object.public_send(key_method), object] }]
+      def array_to_hash_as_value(array, integration)
+        result = array.map do |object|
+          key = object.public_send(integration.integrated_key)
+          [key, integrative_value(object, integration)]
+        end
+        Hash[result]
       end
 
-      def array_to_hash_as_array(array, key_method)
+      def array_to_hash_as_array(array, integration)
         result = {}
         array.each do |object|
-          key = object.public_send(key_method)
+          key = object.public_send(integration.integrated_key)
           result[key] ||= []
-          result[key] << object
+          result[key] << integrative_value(object, integration)
         end
         result
       end
