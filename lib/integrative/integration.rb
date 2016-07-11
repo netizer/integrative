@@ -15,12 +15,12 @@ module Integrative
 
     def invalidate
       if call_options.blank? && init_options[:requires].present?
-        throw "You used 'integrate' for #{name} without options," +
+        raise "You used 'integrate' for #{name} without options," +
           " but the following options are required: #{init_options[:requires]}"
       end
 
       if call_options.present? && init_options[:requires].blank?
-        throw "You used 'integrate' for #{name} with unexpected options," +
+        raise "You used 'integrate' for #{name} with unexpected options," +
           " you should define integration like this:" +
           " 'integrates :#{name}, requires: [:#{call_options.keys.join(", :")}]'"
       end
@@ -30,12 +30,12 @@ module Integrative
         too_little_options = init_options[:requires] - call_options.keys
 
         if too_many_options.present?
-          throw "You used 'integrate' for #{name}" +
+          raise "You used 'integrate' for #{name}" +
             " with too many options: #{too_many_options}"
         end
 
         if too_little_options.present?
-          throw "You used 'integrate' for #{name}" +
+          raise "You used 'integrate' for #{name}" +
             " with too little options: #{too_little_options}"
         end
       end

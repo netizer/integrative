@@ -40,7 +40,7 @@ module Integrative
             names.each do |name|
               integration = klass.integrations_defined.find { |integration| integration.name == name }
               if integration.nil?
-                throw "Unknown integration '#{name}'"
+                raise "Unknown integration '#{name}'"
               end
               integration.call_options = options
               integration.invalidate
