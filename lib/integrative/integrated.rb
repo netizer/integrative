@@ -10,9 +10,13 @@ module Integrative
         find(ids)
       end
 
+      def integrator_ids(integrator_records, integration)
+        integrator_records.map(&integration.integrator_key)
+      end
+
       def integrative_find_and_assign(integrator_records, integration)
-        ids = integrator_records.map(&integration.integrator_key)
-        integrated = integrative_find(ids, integration)
+        ids = integrative_ids(integrator_records, integration)
+        integrated = integrator_find(ids, integration)
         integrated_by_integrator_id =
           array_to_hash(integrated, integration.integrated_key)
         integrator_records.each do |record|

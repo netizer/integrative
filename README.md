@@ -25,18 +25,22 @@ Imagine the following context:
 
 ```ruby
   class User < ApplicationRecord
-    integrates :user_flags
+    include Integrative::Integrator
+
+    integrates :user_flag
   end
 
   class UserFlag < SomeRedisObject
-    attr_accessor :user_id
-    attr_accessor :flags_list
+    include Integrative::Integrated
 
-    def extract_ids(objects)
+    attr_accessor :user_id
+    attr_accessor :name
+
+    def self.integrator_ids(objects)
       objects.map { |obj| "redis_user_flag_#{obj.id}" }
     end
 
-    def self.fetch(ids)
+    def self.find(ids)
       @redis.mget(*ids)
     end
   end
@@ -45,14 +49,14 @@ Imagine the following context:
 Now let's say you would like to see the list of all users with their flags. Try this:
 
 ```ruby
-  users = User.limit(1000).integrate(:user_flags).to_a
+  users = User.limit(1000).integrate(:user_flag).to_a
 ```
 
 **the above code will call redis only once** and will fetch user_flag for all 1000 users,
 so now you can access all the flags like this:
 
 ```ruby
-  users.map { |user| user.user_flag }
+  users.map { |user| user.user_flag.name }
 ```
 
 ### Example 2: Prefetching another Active Record model
@@ -62,13 +66,16 @@ Let's say you have the following situation:
 
 ```ruby
   class User < ApplicationRecord
-    integrates :relation_with_current_user, as: :boolean
+    include Integrative::Integrator
+
+    integrates :relation, requires: [:with]
   end
 
-  class RelationWithCurrentUser < SomeRedisObject
-    def self.fetch(ids, options)
-      relations = Relation.where(user_id: options[:user].id, other_user_id: ids)
-      hash_by_id(relations, :user_id)
+  class Relation
+    include Integrative::Integrated
+
+    def self.integrative_find(ids, integration)
+      Relation.where(user_id: integration.call_options[:with].id, other_user_id: ids)
     end
   end
 ```
@@ -77,7 +84,7 @@ Now you want to fetch some Users and have already prefatched information about t
 With `Integrative` you just do:
 
 ```ruby
-  User.where(public: true).integrate(:relation_with_current_user, user: current_user).limit(1000)
+  User.where(public: true).integrate(:relation, with: current_user).limit(1000)
 ```
 
 Boom. Pretty cool, ha?
