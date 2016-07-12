@@ -34,11 +34,12 @@ Imagine the following context:
     attr_accessor :user_id
     attr_accessor :name
 
-    def self.integrator_ids(objects)
-      objects.map { |obj| "redis_user_flag_#{obj.id}" }
-    end
-
     def self.find(ids)
+      # Have in mind it's a simplification.
+      # `find` should return array of hashes
+      # with (in this case) `name` and `user_id`
+      # so you'd need to store hashes
+      # and convert data accordingly
       @redis.mget(*ids)
     end
   end
@@ -134,7 +135,7 @@ per model, but sometimes you want to assign an array of external objects per mod
 
 ## Using `Integrative` on a single instance
 
-So what if you'd like to prefetch something not for a list of users, but for a sibgle user?
+So what if you'd like to prefetch something not for a list of users, but for a single user?
 Well, it works exactly how you would think:
 
 ```ruby
@@ -152,7 +153,7 @@ Sometimes you just want to prefetch certain data for an array of objects (and no
 
 ## Working with external resources
 
-While working with external resources you need to implement the code that fetches external data and then itegrates over the result to assign parts of it to the right models. Now it's all up to you how will you do it but There is a pattern that fits well into `Integrative`. Take a look:
+While working with external resources you need to implement the code that fetches external data and then assigns parts of it to the right models. Now it's all up to you how you'll do this but there is a pattern that fits well into `Integrative`. Take a look:
 
 ```ruby
   # file app/models/integrative_record.rb
