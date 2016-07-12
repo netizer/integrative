@@ -74,7 +74,7 @@ Let's say you have the following situation:
     include Integrative::Integrated
 
     def self.integrative_find(ids, integration)
-      Relation.where(user_id: integration.call_options[:with].id, other_user_id: ids)
+      Friend.where(user_id: integration.call_options[:with].id, other_user_id: ids)
     end
   end
 ```
