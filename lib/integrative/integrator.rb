@@ -55,7 +55,7 @@ module Integrative
           def integrate(*name_or_names, **options)
             names = [*name_or_names]
             names.each do |name|
-              integration = klass.integrations_defined.find { |integration| integration.name == name }
+              integration = klass.integrations_defined.find { |i| i.name == name }
               if integration.nil?
                 raise "Unknown integration '#{name}'"
               end

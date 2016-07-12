@@ -67,6 +67,14 @@ class Integrative::Test < ActiveSupport::TestCase
     assert_equal @frank.gravatar, "http://0.gravatar.com/avatar/frank"
   end
 
+  test "integrated models when called on array of objects" do
+    users = User.all.to_a
+    Integrative.integrate_into(users, :facebook)
+
+    facebook_names = users.map(&:facebook).map(&:name)
+    assert_equal facebook_names, ["FB name of Frank", "FB name of Mark"]
+  end
+
   def create_friendship(user, other_user)
     FactoryGirl.create(:friend, user: user, other_user: other_user)
     FactoryGirl.create(:friend, user: other_user, other_user: user)
