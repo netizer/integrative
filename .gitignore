@@ -2,3 +2,4 @@ test/dummy/log/*.*
 test/dummy/db/*.sqlite3
 test/dummy/db/*.sqlite3-journal
 .byebug_history
+pkg/

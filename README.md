@@ -1,10 +1,10 @@
 # Integrative
 
-Integrative is a library for integrating external resources into ActiveRecord models.
+`Integrative` is a library for integrating external resources into ActiveRecord models.
 
 Now, however you interpret "external" - this library is exactly for that ;-)
 
-Cosider few exaples of what can be integrated into ActiveRecord model:
+Consider few examples of what can be integrated into ActiveRecord model:
 * ActiveResource model
 * a custom object that fetches data from external websites
 * an object fetching data from Redis
@@ -12,7 +12,7 @@ Cosider few exaples of what can be integrated into ActiveRecord model:
 
 You may ask
 
-> :triumph:: ok, but why would I use Integrative? I can easily implement that on my own.
+> :triumph:: ok, but why would I use `Integrative`? I can easily implement that on my own.
 
 > :sunglasses:: I'm glad you asked. The best reason is that **it helps to fetch a lot of data at once**, and by that it significantly improves performance.
 
@@ -60,7 +60,7 @@ so now you can access all the flags like this:
 
 ### Example 2: Prefetching another Active Record model
 
-You can use Integrative also when you want to eager-load certain models to collection of other models when `ActiveRecord` doesn't make it easy.
+You can use `Integrative` also when you want to eager-load certain models to collection of other models when `ActiveRecord` doesn't make it easy.
 Let's say you have the following situation:
 
 ```ruby
