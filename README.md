@@ -1,5 +1,3 @@
-**WARNING: Until version 0.1 some of the features described below might not be implemented yet.**
-
 # Integrative
 
 Integrative is a library for integrating external resources into ActiveRecord models.
@@ -89,14 +87,59 @@ With `Integrative` you just do:
 
 Boom. Pretty cool, ha?
 
-## Using `Integrative` on a single object
+## Treating integrated object as primary type value (string, int, ...)
+
+Now check this out:
+
+```ruby
+  class User < ApplicationRecord
+    integrates :is_admin, as: :primary
+  end
+
+  User.integrate(:is_admin).first.is_admin # that would be `true` or `false`
+```
+
+Of course for that you'd need to take care for preparing data properly in the integrated object:
+
+```ruby
+  class IsAdmin
+    include Integrative::Integrated
+
+    def self.integrative_find(ids, integration)
+      # this should return a list of hashes
+      # with a key (e.g. user_id) and a `value`,
+      # for example:
+      # [
+      #   {user_id: 1, value: true}
+      #   {user_id: 2, value: false}
+      # ]
+      response = find(ids)
+      response.map { |item| OpenStruct.new(item) }
+    end
+  end
+```
+
+## Integrating objects with `1-to-many` relation
+
+Like with `has_one` and `has_many` relations, sometimes you want to assign one external object
+per model, but sometimes you want to assign an array of external objects per model. In such moments use `array: true` as an option parameter of integration
+
+```ruby
+  class User < ApplicationRecord
+    integrates :flags, array: true
+  end
+
+  User.first.flags # this is an array
+```
+
+## Using `Integrative` on a single instance
 
 So what if you'd like to prefetch something not for a list of users, but for a sibgle user?
 Well, it works exactly how you would think:
 
 ```ruby
-  fun = User.first
-  fun.with_flags # yes, that's gonna fetch and return a list of flags of the user.
+  user = User.first
+  user.flags # yes, that's gonna fetch and return a list of flags of the user.
 ```
 
 ## Using `Integrative` on an array
@@ -109,25 +152,39 @@ Sometimes you just want to prefetch certain data for an array of objects (and no
 
 ## Working with external resources
 
-`Integrative` just works if what you want to integrate into a model is an `ActiveRecord` object. All you have to do is to include the right module:
-
-```ruby
-  class PrefetchedResource < ApplicationRecord
-    include Integrative::ActiveRecord
-  end
-```
-
-but when you want to work with external resources you would need to implement the code that actually fetches external data and then iterates over the result to assign parts of it to the right models. `Integrative` offers a pattern for that. Take a look.
+While working with external resources you need to implement the code that fetches external data and then itegrates over the result to assign parts of it to the right models. Now it's all up to you how will you do it but There is a pattern that fits well into `Integrative`. Take a look:
 
 ```ruby
   # file app/models/integrative_record.rb
-  class IntegrativeRecord < Integrative::ExternalResource
+  class IntegrativeRecord
+    include Integrative::Integrated
+
+    def url_base
+      'http://external.service.com'
+    end
+
+    def full_url(ids)
+      url_base + path(ids)
+    end
   end
 
-  # file app/models/external_resource.rb
-  class ExternalResource < IntegrativeRecord
-    def integrative_find(objects, options = {})
-      # Some fetching and putting things into objects
+  # file app/models/avatar.rb
+  class Avatar < IntegrativeRecord
+
+    def path(ids)
+      "avatars?user_ids=#{ids.join(',')}"
+    end
+
+    def find(ids)
+      response = RestClient.get full_path(ids)
+      response_hash = HashWithIndifferentAccess.new(JSON.parse(response.body))
+      response_hash[:results]
     end
   end
 ```
+
+## Contributing
+
+If you feel like contributing to this project, feel free to create a bug report or send a pull request, but if you want to increase chances that I'll find time for taking care for your contribution, please make sure to make it easy for me - for pull requests write tests, for bug reports attach code that will let me reproduce the issue.
+
+Have fun ;-)
