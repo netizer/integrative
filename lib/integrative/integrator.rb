@@ -15,23 +15,8 @@ module Integrative
 
     class_methods do
       def integrates(name, options = {})
-        if self.instance_methods.include? name
-          raise Errors::MethodAlreadyExistsError.new(self, name)
-        end
-        if !defined?(integrations_defined)
-          patch_activerecord_relation_for_integrative
-          class_attribute :integrations_defined
-        end
-        integration = Integration.new(name, self, options)
-        self.integrations_defined ||= []
-        self.integrations_defined << integration
-        self.class_eval do
-          attr_accessor name
-
-          define_method name do
-            integrative_dynamic_method_call(name, integration)
-          end
-        end
+        initialize_integrative(name)
+        define_integration(name, options)
       end
 
       def integrate(*name_or_names, **options)
@@ -44,31 +29,36 @@ module Integrative
 
       def patch_activerecord_relation_for_integrative
         self::ActiveRecord_Relation.class_eval do
-          def integrate(*name_or_names, **options)
-            names = [*name_or_names]
-            names.each do |name|
-              integration = klass.integrations_defined.find { |i| i.name == name }
-              if integration.nil?
-                raise Errors::IntegrationDefinitionMissingError.new(klass, [name])
-              end
-              integration.call_options = options
-              integration.invalidate
-              @integrations_used ||= []
-              @integrations_used << integration
-            end
-            self
-          end
+          include Integrative::Extensions::RelationExtension
+        end
+      end
 
-          def load
-            super
-            if @integrations_used.present?
-              Rails.logger.info "Integrations fetched for #{@records.length} #{klass.name} records."
-              @integrations_used.each do |integration|
-                integration.integrated_class.integrative_find_and_assign(@records, integration)
-              end
-            end
-            self
-          end
+      private
+
+      def initialize_integrative(name)
+        if self.instance_methods.include? name
+          raise Errors::MethodAlreadyExistsError.new(self, name)
+        end
+        if !defined?(integrations_defined)
+          patch_activerecord_relation_for_integrative
+          class_attribute :integrations_defined
+        end
+      end
+
+      def define_integration(name, options)
+        integration = Integration.new(name, self, options)
+        self.integrations_defined ||= []
+        self.integrations_defined << integration
+        self.class_eval do
+          define_integration_method(name, integration)
+        end
+      end
+
+      def define_integration_method(name, integration)
+        attr_accessor name
+
+        define_method name do
+          integrative_dynamic_method_call(name, integration)
         end
       end
     end
