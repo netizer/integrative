@@ -71,10 +71,55 @@ class Integrative::Test < ActiveSupport::TestCase
 
   test "integrated models when called on array of objects" do
     users = User.all.to_a
+
     Integrative.integrate_into(users, :facebook)
 
     facebook_names = users.map(&:facebook).map(&:name)
     assert_equal facebook_names, ["FB name of Frank", "FB name of Mark"]
+  end
+
+  test "raises Error when integrate option is missing" do
+    assert_raises Integrative::Errors::RuntimeOptionMissingError do
+      User.integrate(:relation)
+    end
+  end
+
+  test "raises Error when integrate is called with option and none is expected" do
+    assert_raises Integrative::Errors::UnexpectedRuntimeOptionError do
+      User.integrate(:facebook, with: User.first)
+    end
+  end
+
+  test "raises Error when integrate is called with more options than needed" do
+    assert_raises Integrative::Errors::TooManyRuntimeOptionsError do
+      User.integrate(:relation, with: User.first, and: :voila)
+    end
+  end
+
+  test "raises Error when integrate is called with less options than needed" do
+    assert_raises Integrative::Errors::TooLittleRuntimeOptionsError do
+      Category.integrate(:flag, a: 1)
+    end
+  end
+
+  test "raises Error when integrates is called with name of existing method" do
+    assert_raises Integrative::Errors::MethodAlreadyExistsError do
+      User.class_eval do
+        integrates :category
+      end
+    end
+  end
+
+  test "raises Error when integrate is called on a model that has no integrations" do
+    assert_raises Integrative::Errors::IntegrationDefinitionMissingError do
+      Friend.integrate(:facebook)
+    end
+  end
+
+  test "raises Error when integrate is called but the integration is not defined" do
+    assert_raises Integrative::Errors::IntegrationDefinitionMissingError do
+      User.integrate(:twitter)
+    end
   end
 
   def create_friendship(user, other_user)

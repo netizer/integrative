@@ -15,6 +15,9 @@ module Integrative
 
     class_methods do
       def integrates(name, options = {})
+        if self.instance_methods.include? name
+          raise Errors::MethodAlreadyExistsError.new(self, name)
+        end
         if !defined?(integrations_defined)
           patch_activerecord_relation_for_integrative
           class_attribute :integrations_defined
@@ -22,10 +25,6 @@ module Integrative
         integration = Integration.new(name, self, options)
         self.integrations_defined ||= []
         self.integrations_defined << integration
-        if self.instance_methods.include? name
-          raise "Method '#{name}' is already defined on #{self.name}." +
-            " You can not define integration with this name."
-        end
         self.class_eval do
           attr_accessor name
 
@@ -39,10 +38,7 @@ module Integrative
         if all.public_methods.include? :integrate
           all.integrate(*name_or_names, **options)
         else
-          raise "You tried to call `integrate` on a class #{name}" +
-            " but this class has no integrations." +
-            " add the following line to the class #{name}:" +
-            " 'integrates :#{name_or_names.join(', :')}'"
+          raise Errors::IntegrationDefinitionMissingError.new(self, name_or_names)
         end
       end
 
@@ -53,7 +49,7 @@ module Integrative
             names.each do |name|
               integration = klass.integrations_defined.find { |i| i.name == name }
               if integration.nil?
-                raise "Unknown integration '#{name}'"
+                raise Errors::IntegrationDefinitionMissingError.new(klass, [name])
               end
               integration.call_options = options
               integration.invalidate
