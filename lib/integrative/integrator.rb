@@ -2,10 +2,6 @@ module Integrative
   module Integrator
     extend ActiveSupport::Concern
 
-    included do
-    end
-
-
     def integrative_dynamic_method_call(name, integration)
       ivar = "@#{name}"
       if instance_variable_defined? ivar

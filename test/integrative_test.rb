@@ -42,7 +42,9 @@ class Integrative::Test < ActiveSupport::TestCase
     create(:user, name: "Mar", category: @category2)
     categories = Category.integrate(:recently_added_user).to_a
 
-    category_and_user_names = categories.map { |category| [category.name, category.recently_added_user.name] }
+    category_and_user_names = categories.map do |category|
+      [category.name, category.recently_added_user.name]
+    end
     assert_equal category_and_user_names, [["Frankist", "Fran"], ["Marxist", "Mar"]]
   end
 

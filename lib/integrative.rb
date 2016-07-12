@@ -21,17 +21,15 @@
 #
 #   users = User.limit(1000).integrate(:user_flags).to_a
 
-module Integrative
-  autoload :Integrator, 'integrative/integrator'
-  autoload :Integrated, 'integrative/integrated'
-  autoload :Integration, 'integrative/integration'
+require 'integrative/utils'
 
-  def self.integrate_into(records, integration_name, options = {})
-    if records.length > 0
-      integration = Integration.new(integration_name, records.first.class, options)
-      integration.integrated_class.integrative_find_and_assign(records, integration)
-    end
-  end
+module Integrative
+  extend Utils
+
+  autoload :Integrator,  'integrative/integrator'
+  autoload :Integrated,  'integrative/integrated'
+  autoload :Integration, 'integrative/integration'
+  autoload :Errors,      'integrative/errors'
 end
 
 

@@ -53,6 +53,5 @@ module Integrative
       default_integrated_key = "#{integrator_class.name.underscore}_id"
       init_options[:integrated_key] || default_integrated_key
     end
-
   end
 end
